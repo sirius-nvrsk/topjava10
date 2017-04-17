@@ -31,8 +31,12 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
     }
 
     @Override
-    public void delete(int id) {
-        repository.remove(id);
+    public boolean delete(int id) {
+        if ( repository.containsKey(id) ) {
+            repository.remove(id);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -44,5 +48,6 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
     public Collection<Meal> getAll() {
         return repository.values();
     }
+
 }
 
