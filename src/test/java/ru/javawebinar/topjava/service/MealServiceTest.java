@@ -1,5 +1,7 @@
 package ru.javawebinar.topjava.service;
 
+import org.junit.AfterClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -18,6 +20,10 @@ import java.util.Arrays;
 import static ru.javawebinar.topjava.MealTestData.*;
 import static ru.javawebinar.topjava.UserTestData.ADMIN_ID;
 import static ru.javawebinar.topjava.UserTestData.USER_ID;
+import org.junit.rules.ExternalResource;
+import org.junit.rules.*;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
 
 @ContextConfiguration({
         "classpath:spring/spring-app.xml",
@@ -26,9 +32,19 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 @RunWith(SpringJUnit4ClassRunner.class)
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
 public class MealServiceTest {
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+    @Rule
+    public PrintRuleTest pr = new PrintRuleTest();
 
     static {
         SLF4JBridgeHandler.install();
+    }
+    @AfterClass
+    public void printInfo() {
+        java.util.logging.Logger  log4jLog = java.util.logging.Logger.getLogger("log4jLog");
+        log4jLog.info(  pr.getInfo() );
+        System.out.println( pr.getInfo() );
     }
 
     @Autowired
@@ -47,6 +63,7 @@ public class MealServiceTest {
 
     @Test
     public void testSave() throws Exception {
+        thrown.expect(Exception.class);
         Meal created = getCreated();
         service.save(created, USER_ID);
         MATCHER.assertCollectionEquals(Arrays.asList(created, MEAL6, MEAL5, MEAL4, MEAL3, MEAL2, MEAL1), service.getAll(USER_ID));
@@ -60,6 +77,7 @@ public class MealServiceTest {
 
     @Test(expected = NotFoundException.class)
     public void testGetNotFound() throws Exception {
+        thrown.expect(NotFoundException.class);
         service.get(MEAL1_ID, ADMIN_ID);
     }
 
